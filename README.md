@@ -85,7 +85,11 @@
     ```bash
     cd CHALLENGEforBRO
     ```
-3. Установите зависимости:
+3. Выполните команду python -m venv venv
+
+4. Затем выполните .\venv\Scripts\activate
+
+5. Установите зависимости:
     ```bash
     pip install -r requirements.txt
     ```
