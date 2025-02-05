@@ -7,8 +7,8 @@ from .models import Challenge, Book, Participant, Quiz, Question, Answer, Comple
 from .forms import CustomUserCreationForm, BookSelectionForm, QuizAnswerForm
 from django.db.models import Count
 from django.contrib.auth.models import User
-from .models import AudioChallenge
-from .forms import AudioChallengeForm
+from .models import AudioChallenge, Profile, AudioQuestion, SupportMessage
+from .forms import AudioChallengeForm, ProfileForm, SupportMessageForm
 import random
 import string
 from django.utils import timezone
@@ -54,8 +54,18 @@ def password_change_done(request):
 # Личный кабинет
 @login_required
 def profile(request):
-    """Личный кабинет пользователя"""
-    return render(request, 'users/profile.html', {'user': request.user})
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+    else:
+        form = ProfileForm(instance=request.user.profile)
+    if not hasattr(request.user, 'profile'):
+        from .models import Profile 
+        Profile.objects.create(user=request.user)  # Создаем профиль, если его нет
+
+    return render(request, 'profile.html', {'form': form})
 
 # Список челленджей
 @login_required
@@ -101,7 +111,6 @@ def join_challenge(request, challenge_id):
         # Если есть квизы, редиректим на список квизов
         redirect_url = 'quiz_list'  
     else:
-        # В остальных случаях выбор книги
         redirect_url = 'book_selection'
 
     if created:
@@ -176,9 +185,13 @@ def book_selection(request, challenge_id):
 
 # Детали книги
 def book_detail(request, book_id):
-    """Отображение полной информации о книге, включая текст"""
     book = get_object_or_404(Book, id=book_id)
-    return render(request, 'challenges/book_detail.html', {'book': book})
+    coupon_images = book.challenge.coupon_images.all()  
+    return render(request, 'challenges/book_detail.html', {
+        'book': book,
+        'coupon_images': coupon_images  
+    })
+
 
 # Список квизов
 @login_required
@@ -193,6 +206,7 @@ def quiz_list(request, challenge_id):
 def quiz_view(request, quiz_id):
     """Прохождение квиза"""
     quiz = get_object_or_404(Quiz, id=quiz_id)
+    coupon_images = quiz.challenge.coupon_images.all()
     form = QuizAnswerForm(request.POST or None)
     success = None
 
@@ -207,7 +221,7 @@ def quiz_view(request, quiz_id):
 
         return render(request, "quiz/quiz_complete.html", {"quiz": quiz, "success": success})
 
-    return render(request, "quiz/quiz.html", {"quiz": quiz, 'form': form, "success": success})
+    return render(request, "quiz/quiz.html", {"quiz": quiz, 'form': form, "success": success, "coupon_images": coupon_images})
 
 # Универсальная обработка ошибок
 def handle_404(request, exception):
@@ -225,39 +239,50 @@ def audio_challenge_list(request, challenge_id):
     challenges = AudioChallenge.objects.filter(challenge=challenge) 
     return render(request, 'audio_challenge/audio_challenge_list.html', {'challenges': challenges, 'challenge': challenge})
 
-
 @login_required
 def audio_challenge_detail(request, audiochallenge_id):
-    """Детали аудиочелленджа с проверкой ответа"""
     challenge = get_object_or_404(AudioChallenge, id=audiochallenge_id)
-    form = AudioChallengeForm(request.POST or None, audio_challenge=challenge) 
+    questions = challenge.questions.all()
 
-    success = None
+    if request.method == 'POST':
+        form = AudioChallengeForm(request.POST, questions=questions)
+        correct = 0
+        total = questions.count()
 
-    if request.method == "POST" and form.is_valid():
-        user_answer = form.cleaned_data['user_answer'].strip().lower()  # Приводим ответ к нижнему регистру
-        correct_answer = challenge.correct_answer.strip().lower()  # Приводим правильный ответ к нижнему регистру
+        if form.is_valid():
+            for question in questions:
+                user_answer = form.cleaned_data.get(f'answer_{question.id}', '').strip().lower()
+                if user_answer == question.correct_answer.lower():
+                    correct += 1
 
-        # Логирование для отладки, эта часть пока не работает, но до офф защиты починится
-        print(f"User answer: '{user_answer}' -> {', '.join(map(str, list(user_answer)))}")
-        print(f"Correct answer: '{correct_answer}' -> {', '.join(map(str, list(correct_answer)))}")
-
-
-        if user_answer == correct_answer:
-            success = True
-            messages.success(request, 'Поздравляем! Ответ правильный. Вы получили купон!')
+            request.session['audio_success'] = {'correct': correct, 'total': total}
             return redirect('audio_challenge_success', audiochallenge_id=challenge.id)
-        else:
-            success = False
-            messages.error(request, 'Ответ неправильный. Попробуйте снова.')
+    else:
+        form = AudioChallengeForm(questions=questions)
 
     return render(request, 'audio_challenge/audio_challenge_detail.html', {
-        'challenge': challenge, 'form': form, 'success': success
+        'challenge': challenge,
+        'form': form,
+        'questions': questions
     })
 
-
+@login_required
 def audio_challenge_success(request, audiochallenge_id):
-    challenge = get_object_or_404(AudioChallenge, id=audiochallenge_id)
-    return render(request, 'audio_challenge/audio_challenge_success.html', {'challenge': challenge})    
+    results = request.session.get('audio_success', {'correct': 0, 'total': 0})
+    return render(request, 'audio_challenge/audio_challenge_success.html', {
+        'correct': results['correct'],
+        'total': results['total']
+    })
 
+@login_required
+def support_chat(request):
+    form = SupportMessageForm() 
+    if request.method == 'POST':
+        form = SupportMessageForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.user = request.user
+            message.save()
+            form = SupportMessageForm() 
 
+    return render(request, 'support/chat_modal.html', {'form': form})

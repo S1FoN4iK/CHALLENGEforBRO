@@ -1,8 +1,10 @@
 from django.urls import path
 from . import views
+from .views import support_chat
 
 urlpatterns = [
     path('profile/', views.profile, name='profile'),
+    path('support/', support_chat, name='support_chat'),
     path('', views.challenge_list, name='challenge_list'),
     path('<int:challenge_id>/', views.challenge_detail, name='challenge_detail'),
     path('change-password/', views.change_password, name='change_password'),

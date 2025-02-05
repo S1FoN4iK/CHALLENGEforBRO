@@ -1,13 +1,30 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Challenge, Book, Quiz, Answer, AudioChallenge
+from .models import Challenge, Book, Quiz, Answer, AudioChallenge, Profile, SupportMessage
 
 # Форма регистрации пользователя
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'password1', 'password2', 'email']
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['avatar']
+
+class SupportMessageForm(forms.ModelForm):
+    class Meta:
+        model = SupportMessage
+        fields = ['message']
+        widgets = {
+            'message': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Введите ваше сообщение...'
+            }),
+        }
 
 # Форма для выбора книги в челлендже
 class BookSelectionForm(forms.Form):
@@ -17,21 +34,17 @@ class BookSelectionForm(forms.Form):
 class QuizAnswerForm(forms.Form):
     answers = forms.ModelMultipleChoiceField(queryset=Answer.objects.all(), required=True)
 
-class AudioChallengeForm(forms.Form):
-    user_answer = forms.CharField(max_length=255, required=True, label="Ваш ответ")
 
+class AudioChallengeForm(forms.Form):
+    # Динамически создаем поля для ответов
     def __init__(self, *args, **kwargs):
-        self.audio_challenge = kwargs.pop('audio_challenge', None)
+        questions = kwargs.pop('questions', None)
         super().__init__(*args, **kwargs)
 
-    def clean_user_answer(self):
-        answer = self.cleaned_data.get("user_answer").strip().lower()  # Приводим ответ к нижнему регистру
-
-        if self.audio_challenge:
-            if answer != self.audio_challenge.correct_answer.strip().lower():
-                raise forms.ValidationError("Ответ неправильный. Попробуйте снова.")
-        else:
-            raise forms.ValidationError("Отсутствует объект audio_challenge.")
-
-        return answer
-
+        if questions:
+            for question in questions:
+                self.fields[f'answer_{question.id}'] = forms.CharField(
+                    label=f'Ответ на вопрос {question.id}',
+                    widget=forms.TextInput(attrs={'placeholder': 'Введите ваш ответ'}),
+                    required=True
+                )

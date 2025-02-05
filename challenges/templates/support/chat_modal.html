@@ -1,0 +1,114 @@
+<div class="modal fade" id="supportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="profile-container">
+                <a href="{% url 'challenge_list' %}" class="back-button">Назад</a>
+                <div class="profile-header">
+                    <h1>Написать в поддержку</h1>
+                </div>
+                <form method="post" id="supportForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {{ form.message }}
+                    </div>
+                    <button type="submit" class="button w-100 mt-3">Отправить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% load static %}
+
+<style>
+    body {
+        background: url("{% static 'fon2.png' %}") no-repeat center center; 
+        background-size: cover;
+        background-color: #000; 
+        color: #fff;  
+    }
+
+    .modal-content {
+        border: none;
+        background: transparent;
+    }
+
+    .profile-container {
+        background: #333;  
+        border-radius: 10px;
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 30px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .profile-header h1 {
+        color: #fff;  
+        margin-bottom: 20px;
+    }
+
+    .back-button {
+        text-decoration: none;
+        padding: 10px 20px;
+        background-color: #000;
+        color: #fff;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        display: inline-block;
+        font-weight: bold;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .back-button:hover {
+        background-color: #333;
+        color: #fff;
+    }
+
+    .button {
+        background-color: #000;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        text-align: center;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .button:hover {
+        background-color: #333;
+        color: #fff;
+    }
+
+    textarea {
+        height: 200px;
+        font-size: 16px;
+        resize: none;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('supportForm');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        fetch('{% url "support_chat" %}', {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                form.reset();  
+                $('#supportModal').modal('hide');  
+            }
+        });
+    });
+});
+</script>
+
+
+
+

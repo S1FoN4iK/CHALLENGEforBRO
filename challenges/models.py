@@ -22,6 +22,40 @@ class Challenge(models.Model):
     def __str__(self):
         return self.title
 
+class CouponImage(models.Model):
+    """Модель для изображения купона, привязанного к челленджу."""
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE, related_name='coupon_images')
+    image = models.ImageField(upload_to='coupon_images/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Coupon image for {self.challenge.title}"
+
+class SupportMessage(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
+    is_answered = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Сообщение от {self.user.username} ({self.created_at})"
+
+class SupportResponse(models.Model):
+    message = models.ForeignKey(SupportMessage, on_delete=models.CASCADE, related_name='responses')
+    admin = models.ForeignKey(User, on_delete=models.CASCADE)
+    response = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Ответ от {self.admin.username} на сообщение #{self.message.id}"
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to='avatars/', default='avatars/default.png')
+
+    def __str__(self):
+        return self.user.username
+
 class DailyCoupon(models.Model):
     code = models.CharField(max_length=50, unique=True)
     discount = models.DecimalField(max_digits=5, decimal_places=2)
@@ -88,7 +122,7 @@ class Participant(models.Model):
     """Модель участника челленджа."""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE, related_name='participants')
-    progress = models.FloatField(default=0.0) 
+    progress = models.FloatField(default=0.0)
 
     def __str__(self):
         return f"{self.user.username} - {self.challenge.title}"
@@ -144,27 +178,30 @@ class Answer(models.Model):
 
 class AudioChallenge(models.Model):
     title = models.CharField(max_length=255)
-    description = models.TextField()
-    audio_file = models.FileField(upload_to='audio_challenges/', null=True, blank=True)
-    correct_answer = models.CharField(max_length=255, null=True, blank=True) 
+    description = models.TextField(blank=True, null=True, verbose_name="Описание")
     challenge = models.ForeignKey(
         'Challenge',
         null=True,
         on_delete=models.CASCADE,
         related_name="audio_challenges",
-        verbose_name="Челлендж",
-        blank=True
+        verbose_name="Челлендж"
     )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
-    image = models.ImageField(
-        upload_to='audio_challenge_images/',
-        null=True,
-        blank=True,
-        verbose_name="Изображение"
-    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
+
+class AudioQuestion(models.Model):
+    audio_challenge = models.ForeignKey(AudioChallenge, on_delete=models.CASCADE, related_name='questions')
+    audio_file = models.FileField(upload_to='audio_questions/')
+    correct_answer = models.CharField(max_length=255)
+    order = models.PositiveIntegerField(default=0)  # Для порядка вопросов
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"Вопрос {self.order} для {self.audio_challenge.title}"
 
 
 

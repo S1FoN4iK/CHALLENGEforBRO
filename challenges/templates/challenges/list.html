@@ -84,7 +84,7 @@
         }
 
         body {
-            background: url('http://127.0.0.1:8000/static/fon.png') no-repeat center center fixed;
+            background: url('http://127.0.0.1:8000/static/fon.jpg') no-repeat center center fixed;
             background-size: cover;
             font-family: Arial, sans-serif;
             color: #333;
@@ -160,6 +160,30 @@
             border-radius: 8px;
             margin-bottom: 30px;
         }
+        .welcome-heading {
+            font-weight: bolder; 
+            color: #000;  
+            font-size: 5rem;  
+            margin-bottom: 15px;  
+            line-height: 1.2;  
+            text-shadow:
+                2px 2px 0px #fff,
+                -2px -2px 0px #fff,
+                2px -2px 0px #fff,
+                -2px 2px 0px #fff;  
+        }
+
+        .welcome-text {
+            font-weight: bolder;  
+            color: #000;  
+            font-size: 1.5rem;  
+            line-height: 1.2; 
+            text-shadow:
+                1px 1px 0px #fff,
+                -1px -1px 0px #fff,
+                1px -1px 0px #fff,
+                -1px 1px 0px #fff; 
+        }
     </style>
 </head>
 <body>
@@ -172,6 +196,7 @@
         <div class="navbar navbar-expand-lg navbar-dark ms-auto">
             <div class="navbar-nav">
                 {% if user.is_authenticated %}
+                    <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="avatar rounded-circle me-2" style="width: 35px; height: 35px;">
                     <a href="{% url 'profile' %}" class="nav-link">Личный кабинет</a>
                     <form action="{% url 'logout' %}" method="post" style="display:inline;">
                         {% csrf_token %}
@@ -187,14 +212,15 @@
     <div class="sidebar" id="sidebar">
         <a href="#">Шторка: Пусто</a>
         <a href="{% url 'leaderboard' %}" class="btn-leaderboard">Список лидеров</a> 
-        <a href="{% url 'get_daily_coupon' %}" class="btn-leaderboard">Ежедневный купон</a> 
+        <a href="{% url 'get_daily_coupon' %}" class="btn-leaderboard">Ежедневный купон</a>
+        <a href="{% url 'support_chat' %}" class="btn-leaderboard">Служба поддержки</a>
     </div>
 
 
     <div class="content container">
-        <div class="black-block">
-            <h2>ДОБРО ПОЖАЛОВАТЬ В МИР ЧЕЛЛЕНДЖЕЙ!</h2>
-            <p>За каждый выполненный челлендж вы будете вознаграждены купоном по теме челленджа.</p>
+        <div class="welcome-heading">
+            <h2 class="welcome-heading">ДОБРО ПОЖАЛОВАТЬ В МИР ЧЕЛЛЕНДЖЕЙ!</h2>
+            <p class="welcome-text">За каждый выполненный челлендж вы будете вознаграждены купоном по теме челленджа.</p>
         </div>
 
         <div class="black-block">

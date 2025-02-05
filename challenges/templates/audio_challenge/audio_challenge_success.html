@@ -6,75 +6,152 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Результат аудиочелленджа</title>
     <style>
+        :root {
+            --dark-bg: #000;
+            --card-bg: #1a1a1a;
+            --accent: #fff;
+            --success: #4CAF50;
+            --error: #f44336;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9; 
-            color: #333333; 
+            font-family: 'Arial', sans-serif;
+            background: var(--dark-bg);
+            color: var(--accent);
+            min-height: 100vh;
             margin: 0;
             padding: 0;
         }
 
-        h1 {
-            text-align: center;
-            font-size: 2rem;
-            color: #000000; 
-            margin-top: 50px;
-            margin-bottom: 30px;
-        }
-
-        .content {
+        .main-content {
             max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #ffffff; 
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); 
+            margin: 4rem auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(255,255,255,0.05);
             text-align: center;
         }
 
-        .coupon {
-            margin: 20px 0;
+        .result-header {
+            margin-bottom: 2.5rem;
         }
 
-        .coupon img {
-            max-width: 100%;
+        .result-title {
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+        }
+
+        .status-message {
+            font-size: 1.2rem;
+            padding: 1rem;
             border-radius: 8px;
+            margin: 2rem 0;
         }
 
-        .return-button {
-            padding: 10px 20px;
-            background-color: #007bff; 
-            color: white;
-            font-size: 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .success {
+            background: rgba(76, 175, 80, 0.15);
+            border: 2px solid var(--success);
+            color: var(--success);
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.15);
+            border: 2px solid var(--error);
+            color: var(--error);
+        }
+
+        .coupon-card {
+            margin: 2rem auto;
+            max-width: 500px;
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .coupon-card:hover {
+            transform: scale(1.03);
+        }
+
+        .coupon-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .return-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2.5rem;
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--accent);
+            font-size: 1.1rem;
             text-decoration: none;
-            display: inline-block;
-            margin-top: 20px;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
         }
 
-        .return-button:hover {
-            background-color: #0056b3; 
+        .return-btn:hover {
+            background: var(--accent);
+            color: var(--dark-bg);
+            transform: translateY(-2px);
         }
 
+        @media (max-width: 768px) {
+            .main-content {
+                margin: 2rem 1rem;
+                padding: 1.5rem;
+            }
+
+            .result-title {
+                font-size: 1.5rem;
+            }
+
+            .coupon-card {
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="content">
-        <h1>{{ challenge.title }}</h1>
+    <div class="main-content">
+        <div class="result-header">
+            <h1 class="result-title">{{ challenge.title }}</h1>
 
-        {% if success %}
-            <p>Поздравляем! Вы прошли аудиочеллендж!</p>
-            <div class="coupon">
-                <img src="{% static 'coupon.jpg' %}" alt="Купон">
+            {% if correct == total and total > 0 %}
+                <div class="status-message success">
+                    Поздравляем! Вы ответили правильно на все вопросы!
+                </div>
+            {% else %}
+                <div class="status-message error">
+                    Правильных ответов: {{ correct }} из {{ total }}
+                </div>
+            {% endif %}
+        </div>
+
+        {% if correct == total and total > 0 %}
+            <div class="coupon-card">
+                {% if challenge.challenge.coupon_images.exists %}
+                    <img src="{{ challenge.challenge.coupon_images.first.image.url }}"
+                         alt="Купон Spotify"
+                         class="coupon-image">
+                {% else %}
+                    <img src="{% static 'coupon1.png' %}"
+                         alt="Купон по умолчанию"
+                         class="coupon-image">
+                {% endif %}
             </div>
-        {% else %}
-            <p>К сожалению, вы ошиблись. Попробуйте ещё раз!</p>
         {% endif %}
 
-        <a href= "return-button">Вернуться к аудиочелленджам</a>
+        <a href="{% url 'challenge_list' %}" class="return-btn">
+            ← На главную
+        </a>
     </div>
 </body>
 </html>
