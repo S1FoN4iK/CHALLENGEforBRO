@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Книги для челленджа</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff; 
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin: 20px 0;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin: 10px 20px;
+            padding: 10px 20px;
+            background: #333; 
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background 0.3s;
+            text-align: center;
+        }
+
+        .back-button:hover {
+            background: #444; 
+        }
+
+        .book-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .book-card {
+            background: #111; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); 
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(255, 255, 255, 0.2);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: auto;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .book-card h2 {
+            font-size: 20px;
+            color: #fff;
+            margin: 10px 0;
+        }
+
+        .book-card p {
+            margin: 5px 0;
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .read-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #333; 
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+
+        .read-button:hover {
+            background: #444; 
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 18px;
+            }
+
+            .book-card {
+                padding: 10px;
+            }
+
+            .read-button {
+                font-size: 12px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="{% url 'challenge_list' %}" class="back-button">&larr; Назад</a>
+    <h1>Ваша цель в течении 30 минут читать книгу на выбор, по их прошествию получите купон в книжный магазин:</h1>
+    <div class="book-list">
+        {% for book in books %}
+            <div class="book-card">
+                {% if book.image %}
+                    <img src="{{ book.image.url }}" alt="{{ book.title }}" class="book-cover">
+                {% endif %}
+                <h2>{{ book.title }}</h2>
+                <p><strong>Автор:</strong> {{ book.author }}</p>
+                <p>{{ book.description }}</p>
+                <a href="{% url 'book_detail' book.id %}" class="read-button">Читать</a>
+            </div>
+        {% endfor %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+

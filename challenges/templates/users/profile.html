@@ -1,0 +1,141 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет</title>
+    <!-- Подключение Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url("{% static 'fon2.png' %}") no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            color: #000; 
+        }
+
+        .profile-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-header h1 {
+            color: #000;
+            margin-left: 20px;
+        }
+
+        .profile-container p {
+            font-size: 16px;
+            margin: 10px 0;
+            color: #000; 
+        }
+
+        .back-button {
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #000;
+            color: #fff;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: inline-block;
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .profile-actions .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #000; 
+            color: #fff; 
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 5px;
+            font-weight: bold;
+        }
+
+        .profile-actions .button:hover {
+            background-color: #333; 
+            color: #fff;
+        }
+
+        .avatar-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            cursor: pointer;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .avatar:hover {
+            transform: scale(1.1);
+            border-color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <a href="{% url 'challenge_list' %}" class="back-button">Назад</a>
+
+        <div class="profile-header">
+            <img id="selected-avatar" src="{% static 'stolas2.png' %}" alt="Avatar 1" class="avatar">
+            <h1>Личный кабинет</h1>
+        </div>
+
+        <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Дата регистрации:</strong> {{ user.date_joined|date:"d.m.Y" }}</p>
+
+        <p>Эти аватарки вы можете поставить себе в профиль</p>
+
+        <div class="avatar-container">
+            <!-- Добавим обработку выбора аватарки с помощью JS -->
+            <img src="{% static 'stolas2.png' %}" alt="Avatar 1" class="avatar" onclick="changeAvatar('{% static 'stolas2.png' %}')">
+            <img src="{% static 'rat.png' %}" alt="Avatar 2" class="avatar" onclick="changeAvatar('{% static 'rat.png' %}')">
+            <img src="{% static 'hamster.png' %}" alt="Avatar 3" class="avatar" onclick="changeAvatar('{% static 'hamster.png' %}')">
+        </div>
+
+        <div class="profile-actions">
+            <a href="{% url 'password_change' %}" class="button">Сменить пароль</a>
+        </div>
+    </div>
+
+    <script>
+        function changeAvatar(avatarUrl) {
+            document.getElementById("selected-avatar").src = avatarUrl;
+        }
+    </script>
+</body>
+</html>
+
+
+

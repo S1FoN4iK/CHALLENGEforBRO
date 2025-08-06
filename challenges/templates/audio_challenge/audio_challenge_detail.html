@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ challenge.title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --dark-bg: #000;
+            --card-bg: #1a1a1a;
+            --accent: #fff;
+            --hover-bg: rgba(255,255,255,0.1);
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--dark-bg);
+            color: var(--accent);
+            min-height: 100vh;
+        }
+
+        .navigation {
+            position: relative;
+            padding-top: 2rem;
+        }
+
+        .back-btn {
+            position: fixed;
+            left: 1.5rem;
+            top: 1.5rem;
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: var(--accent);
+            text-decoration: none;
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            background: var(--accent);
+            color: var(--dark-bg);
+        }
+
+        .main-content {
+            max-width: 800px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(255,255,255,0.05);
+        }
+
+        .challenge-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .challenge-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .challenge-description {
+            color: #ccc;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .question-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .question-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .audio-player {
+            width: 100%;
+            margin: 1rem 0;
+            filter: invert(1);
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            color: var(--accent);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .answer-input:focus {
+            border-color: var(--accent);
+            background: rgba(255,255,255,0.15);
+            outline: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: var(--accent);
+            color: var(--dark-bg);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 16px rgba(255,255,255,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin: 2rem 1rem;
+                padding: 1.5rem;
+            }
+
+            .challenge-title {
+                font-size: 1.5rem;
+            }
+
+            .back-btn {
+                left: 1rem;
+                top: 1rem;
+                padding: 0.4rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navigation">
+        <a href="javascript:history.back()" class="back-btn">← Назад</a>
+    </nav>
+
+    <div class="main-content">
+        <header class="challenge-header">
+            <h1 class="challenge-title">{{ challenge.title }}</h1>
+            <p class="challenge-description">{{ challenge.description }}</p>
+        </header>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% for question in questions %}
+            <div class="question-card">
+                <audio class="audio-player" controls>
+                    <source src="{{ question.audio_file.url }}" type="audio/mpeg">
+                    Ваш браузер не поддерживает аудио
+                </audio>
+
+                <div class="answer-field">
+                    <input type="text"
+                           class="answer-input"
+                           id="answer_{{ question.id }}"
+                           name="answer_{{ question.id }}"
+                           required
+                           placeholder="Ваш ответ {{ forloop.counter }}">
+                </div>
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="submit-btn">Проверить ответы</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
